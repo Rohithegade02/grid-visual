@@ -1,8 +1,10 @@
-import GridCell from '@/components/atoms/GridCell';
 import { GridRowProps } from '@/types/grid.types';
 import { LegendList } from '@legendapp/list';
 import React, { useCallback } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { Dimensions, StyleSheet, View } from 'react-native';
+import VirtualizedCell from './VirtualizedCell';
+
+const { width } = Dimensions.get('window');
 
 const GridRow: React.FC<GridRowProps> = ({
     rowIndex,
@@ -11,27 +13,23 @@ const GridRow: React.FC<GridRowProps> = ({
     visibleColumnStart,
     visibleColumnEnd,
     getCellData,
+    loadCellData,
 }) => {
     // Render individual cell
     const renderCell = useCallback(
         ({ item }: { item: { index: number; width: number } }) => {
-            const cellData = getCellData(rowIndex, item.index);
-            const isLoading = !cellData;
-
             return (
-                <View style={{ width: item.width, height: rowHeight }}>
-                    <GridCell
-                        rowIndex={rowIndex}
-                        columnIndex={item.index}
-                        width={item.width}
-                        height={rowHeight}
-                        data={cellData}
-                        isLoading={isLoading}
-                    />
-                </View>
+                <VirtualizedCell
+                    rowIndex={rowIndex}
+                    columnIndex={item.index}
+                    width={item.width}
+                    height={rowHeight}
+                    getCellData={getCellData}
+                    loadCellData={loadCellData}
+                />
             );
         },
-        [rowIndex, rowHeight, getCellData]
+        [rowIndex, rowHeight, getCellData, loadCellData]
     );
 
     const keyExtractor = useCallback(
@@ -56,7 +54,7 @@ const GridRow: React.FC<GridRowProps> = ({
 
 const styles = StyleSheet.create({
     row: {
-        width: '100%',
+        width: width,
     },
 });
 

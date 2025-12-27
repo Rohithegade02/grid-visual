@@ -46,6 +46,7 @@ export interface GridRowProps {
     visibleColumnStart: number;
     visibleColumnEnd: number;
     getCellData: (rowIndex: number, columnIndex: number) => CellData | undefined;
+    loadCellData?: (rowIndex: number, columnIndex: number) => void;
 }
 
 export interface VirtualizedGridProps {

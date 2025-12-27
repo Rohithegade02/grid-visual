@@ -5,8 +5,6 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { styles } from './styles';
 import { GridPresentationProps } from './types';
 
-
-
 const GridPresentation: React.FC<GridPresentationProps> = ({ config }) => {
     return (
         <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
@@ -16,7 +14,5 @@ const GridPresentation: React.FC<GridPresentationProps> = ({ config }) => {
         </SafeAreaView>
     );
 };
-
-
 
 export default GridPresentation;

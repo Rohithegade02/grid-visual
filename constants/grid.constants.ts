@@ -24,3 +24,6 @@ export const PERFORMANCE_CONSTANTS = {
     DEBOUNCE_SCROLL_MS: 100,
     ANIMATION_DURATION_MS: 300,
 } as const;
+
+
+export const DB_NAME = 'grid_data.db' as const;

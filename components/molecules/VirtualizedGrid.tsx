@@ -6,7 +6,7 @@ import { StyleSheet, View } from 'react-native';
 import GridRow from './GridRow';
 
 const VirtualizedGrid: React.FC<VirtualizedGridProps> = ({ config, getCellData: externalGetCellData }) => {
-    const { getCellData } = useGridData();
+    const { getCellData, loadCellData } = useGridData();
 
     // Use external data provider if provided, otherwise use internal
     const cellDataProvider = externalGetCellData || getCellData;
@@ -31,10 +31,11 @@ const VirtualizedGrid: React.FC<VirtualizedGridProps> = ({ config, getCellData: 
                     visibleColumnStart={0}
                     visibleColumnEnd={config.totalColumns}
                     getCellData={cellDataProvider}
+                    loadCellData={loadCellData}
                 />
             );
         },
-        [config.columns, config.rowHeight, config.totalColumns, cellDataProvider]
+        [config.columns, config.rowHeight, config.totalColumns, cellDataProvider, loadCellData]
     );
 
     const keyExtractor = useCallback((item: { rowIndex: number }) => `row-${item.rowIndex}`, []);
