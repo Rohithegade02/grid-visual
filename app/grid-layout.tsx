@@ -5,7 +5,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 const GridLayout = () => {
     return (
         <SafeAreaView style={styles.container}>
-            <Text>GridLayout</Text>
+            <Text>GridLayoutt</Text>
         </SafeAreaView>
     );
 };
