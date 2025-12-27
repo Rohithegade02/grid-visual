@@ -1,4 +1,4 @@
-import { GridConfig } from "@/types/grid.types";
+import { GridConfig } from '@/types/grid.types';
 
 export interface GridPresentationProps {
     config: GridConfig;
@@ -6,4 +6,12 @@ export interface GridPresentationProps {
     loadingProgress: number;
     totalChunks: number;
     loadedChunks: number;
+    performanceMetrics: {
+        rowsRendered: number;
+        columnsRendered: number;
+        visibleCells: number;
+        fps: number;
+        dbReadTime: number;
+        cachedCells: number;
+    };
 }

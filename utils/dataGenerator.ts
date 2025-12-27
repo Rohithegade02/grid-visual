@@ -1,13 +1,4 @@
 /**
- * Generate a chunk of rows (1,000 rows × 100 columns)
- */
-export interface CellData {
-    row_index: number;
-    column_index: number;
-    value: string;
-}
-
-/**
  * Generate mock data for a single cell
  */
 export const generateCellValue = (rowIndex: number, columnIndex: number): string => {
@@ -23,11 +14,20 @@ export const generateCellValue = (rowIndex: number, columnIndex: number): string
     return patterns[patternIndex];
 };
 
-
+/**
+ * Generate a chunk of rows (1,000 rows × 100 columns)
+ */
+export interface CellData {
+    row_index: number;
+    column_index: number;
+    value: string;
+}
 
 export const generateChunk = (startRow: number, totalColumns: number = 100): CellData[] => {
     const CHUNK_SIZE = 1000;
     const cells: CellData[] = [];
+
+    console.log(`🏭 Generating chunk starting at row ${startRow}, ${CHUNK_SIZE} rows × ${totalColumns} cols`);
 
     for (let row = startRow; row < startRow + CHUNK_SIZE; row++) {
         for (let col = 0; col < totalColumns; col++) {
@@ -38,6 +38,9 @@ export const generateChunk = (startRow: number, totalColumns: number = 100): Cel
             });
         }
     }
+
+    console.log(`✅ Generated ${cells.length} cells. First cell: [${cells[0].row_index}, ${cells[0].column_index}] = "${cells[0].value}"`);
+    console.log(`✅ Last cell: [${cells[cells.length - 1].row_index}, ${cells[cells.length - 1].column_index}] = "${cells[cells.length - 1].value}"`);
 
     return cells;
 };

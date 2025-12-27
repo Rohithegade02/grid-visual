@@ -1,31 +1,48 @@
 import { useDataLoader } from '@/components/hooks/useDataLoader';
+import { useGridData } from '@/components/hooks/useGridData';
+import { usePerformanceMetrics } from '@/components/hooks/usePerformanceMetrics';
 import gridConfigData from '@/config/grid.config.json';
 import { GridConfig } from '@/types/grid.types';
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect } from 'react';
 import GridPresentation from './GridPresentation';
 
+// Type assertion for JSON import
+const gridConfig = gridConfigData as GridConfig;
+
 const GridContainer: React.FC = () => {
-    // Load grid configuration
-    const gridConfig: GridConfig = useMemo(() => gridConfigData as GridConfig, []);
+    const { isLoading, loadingProgress, totalChunks, loadedChunks } = useDataLoader();
 
-    // Initialize data loader
     const {
-        isLoading,
-        loadingProgress,
-        totalChunks,
-        loadedChunks,
-        startBackgroundLoading,
-    } = useDataLoader();
+        metrics,
+        updateVisibleCells,
+        recordDbReadTime,
+        updateCachedCells,
+        incrementFrame,
+    } = usePerformanceMetrics();
 
-    // Start loading data on mount
+    const { getCachedCellsCount } = useGridData(recordDbReadTime);
+
+    // Update cached cells count periodically
     useEffect(() => {
-        // Start background loading after a short delay to let UI render
-        const timer = setTimeout(() => {
-            startBackgroundLoading();
-        }, 500);
+        const interval = setInterval(() => {
+            updateCachedCells(getCachedCellsCount());
+        }, 1000);
 
-        return () => clearTimeout(timer);
-    }, [startBackgroundLoading]);
+        return () => clearInterval(interval);
+    }, [getCachedCellsCount, updateCachedCells]);
+
+    // Increment frame counter on each render
+    useEffect(() => {
+        incrementFrame();
+    });
+
+    // Calculate visible cells based on viewport
+    useEffect(() => {
+        // Approximate visible cells based on screen size
+        const estimatedVisibleRows = Math.ceil(800 / gridConfig.rowHeight); // ~800px viewport height
+        const estimatedVisibleCols = 8; // Approximate visible columns
+        updateVisibleCells(estimatedVisibleRows, estimatedVisibleCols);
+    }, [updateVisibleCells]);
 
     return (
         <GridPresentation
@@ -34,6 +51,7 @@ const GridContainer: React.FC = () => {
             loadingProgress={loadingProgress}
             totalChunks={totalChunks}
             loadedChunks={loadedChunks}
+            performanceMetrics={metrics}
         />
     );
 };

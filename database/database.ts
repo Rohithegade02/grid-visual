@@ -86,11 +86,13 @@ export const getDatabase = async (): Promise<SQLite.SQLiteDatabase> => {
 export const loadChunk = async (chunkIndex: number): Promise<void> => {
     // Check if already loaded
     if (loadedChunks.has(chunkIndex)) {
+        console.log(`⏭️  Chunk ${chunkIndex} already loaded, skipping`);
         return;
     }
 
     // Check if currently loading - return existing promise
     if (loadingChunks.has(chunkIndex)) {
+        console.log(`⏳ Chunk ${chunkIndex} is already loading, waiting...`);
         return loadingChunks.get(chunkIndex)!;
     }
 
@@ -99,6 +101,8 @@ export const loadChunk = async (chunkIndex: number): Promise<void> => {
         try {
             const database = await getDatabase();
             const startRow = chunkIndex * CHUNK_SIZE;
+
+            console.log(`🔄 Loading chunk ${chunkIndex} (rows ${startRow}-${startRow + CHUNK_SIZE - 1})...`);
 
             // Generate chunk data
             const chunkData = generateChunk(startRow, TOTAL_COLUMNS);
@@ -118,14 +122,23 @@ export const loadChunk = async (chunkIndex: number): Promise<void> => {
                 }
             });
 
+            // Mark as loaded AFTER transaction completes
+            loadedChunks.add(chunkIndex);
+
             // Update progress
             const newLoadedRows = (chunkIndex + 1) * CHUNK_SIZE;
             await updateLoadingProgress(Math.min(newLoadedRows, TOTAL_ROWS));
 
-            loadedChunks.add(chunkIndex);
-
             const totalChunks = calculateTotalChunks(TOTAL_ROWS);
-            console.log(`✅ Loaded chunk ${chunkIndex + 1}/${totalChunks} (rows ${startRow}-${startRow + CHUNK_SIZE - 1})`);
+            console.log(`✅ Loaded chunk ${chunkIndex + 1}/${totalChunks} (${chunkData.length} cells inserted)`);
+
+            // Test query immediately after loading
+            const testResult = await database.getFirstAsync<{ count: number }>(
+                'SELECT COUNT(*) as count FROM grid_cells WHERE row_index BETWEEN ? AND ?',
+                [startRow, startRow + 10]
+            );
+            console.log(`🧪 Test query: Found ${testResult?.count || 0} cells in rows ${startRow}-${startRow + 10}`);
+
         } catch (error) {
             console.error(`❌ Failed to load chunk ${chunkIndex}:`, error);
             throw error;
@@ -149,6 +162,9 @@ export const getCellsInRange = async (
 ): Promise<Map<string, string>> => {
     try {
         const database = await getDatabase();
+
+        console.log(`🔍 Querying cells: rows ${startRow}-${endRow}, cols ${startCol}-${endCol}`);
+
         const results = await database.getAllAsync<{ row_index: number; column_index: number; value: string }>(
             `SELECT row_index, column_index, value 
        FROM grid_cells 
@@ -156,6 +172,8 @@ export const getCellsInRange = async (
        AND column_index BETWEEN ? AND ?`,
             [startRow, endRow, startCol, endCol]
         );
+
+        console.log(`📊 Query returned ${results.length} cells`);
 
         const cellMap = new Map<string, string>();
         results.forEach((row) => {
@@ -165,7 +183,7 @@ export const getCellsInRange = async (
 
         return cellMap;
     } catch (err) {
-        console.error('Error fetching cells in range:', err);
+        console.error('❌ Error fetching cells in range:', err);
         return new Map();
     }
 };

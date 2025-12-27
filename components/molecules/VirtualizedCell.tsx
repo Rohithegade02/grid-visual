@@ -44,4 +44,29 @@ const VirtualizedCell: React.FC<VirtualizedCellProps> = ({
     );
 };
 
-export default React.memo(VirtualizedCell);
+// Custom comparison - only re-render if cell data actually changes
+const areEqual = (prevProps: VirtualizedCellProps, nextProps: VirtualizedCellProps): boolean => {
+    // Always re-render if position changes
+    if (prevProps.rowIndex !== nextProps.rowIndex || prevProps.columnIndex !== nextProps.columnIndex) {
+        return false;
+    }
+
+    // Check if cell data changed
+    const prevData = prevProps.getCellData(prevProps.rowIndex, prevProps.columnIndex);
+    const nextData = nextProps.getCellData(nextProps.rowIndex, nextProps.columnIndex);
+
+    // If both undefined, don't re-render
+    if (!prevData && !nextData) {
+        return true;
+    }
+
+    // If one is undefined and other isn't, re-render
+    if (!prevData || !nextData) {
+        return false;
+    }
+
+    // If both have data, compare values
+    return prevData.value === nextData.value;
+};
+
+export default React.memo(VirtualizedCell, areEqual);
